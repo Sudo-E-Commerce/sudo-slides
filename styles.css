@@ -1,0 +1,79 @@
+.galery_content {
+	position: relative;
+	max-height: 500px;
+	width: 100%;
+	overflow: hidden;
+}
+.galery_list {
+	background: rgba(0,0,0,.9);
+	position: relative;
+	max-height: 500px;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    overflow-y: hidden;
+    width: calc(var(--n)*100%);
+    transform: translate(calc(var(--i, 0)/var(--n)*-100% + var(--tx, 0px)));
+}
+.galery_list .item {
+    width: 100%; /* can't take this out either as it breaks Chrome */
+    width: calc(100%/var(--n));
+    display: flex !important;
+}
+.galery_list.scrollMouse.smooth {
+    /* f computes actual animation duration via JS */
+    transition: transform calc(var(--f, 1)*.5s) ease-out;
+}
+.galery_content_item {
+	position: relative;
+	z-index: 999;
+	text-align: center;
+	min-height: 400px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+}
+.galery_content_item img {
+	width: 100%;
+	height: auto;
+	object-fit: contain;
+	max-height: 100%;
+	cursor: pointer;
+}
+.galery_nav {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.galery_next,
+.galery_prev {
+    z-index: 9999999;
+    cursor: pointer;
+    margin-left: 30px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    line-height: 40px;
+    text-align: center;
+    background-color: #fff;
+}
+.galery_nav .nav_item:hover {
+    background-color: rgba(0,0,0,0.7);
+}
+.galery_nav .nav_item i {
+    font-size: 25px;
+    color: #fff;
+    height: 100%;
+    line-height: 40px;
+}
+.galery_next {
+    margin-right: 30px;
+}

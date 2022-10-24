@@ -1,0 +1,2 @@
+SudoSlides('firstSlide')
+SudoSlides('thirdSlide')

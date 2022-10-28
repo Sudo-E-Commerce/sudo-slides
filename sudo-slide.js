@@ -1,28 +1,16 @@
 function SudoSlides(name = '.dnvSlide'){
-	/** gallery slides
-     *
-    //  set --n (used for calc in CSS) via JS, after getting
-    // .container and the number of child images it holds:
-    */
     const _C = document.querySelector(`.${name} .galery_list`),
     totalGLIT = _C.children.length;
     _C.style.setProperty("--n", totalGLIT);
-    // detect the direction of the motion between "touchstart" (or "mousedown") event
-    // and the "touched" (or "mouseup") event
-    // and then update --i (current slide) accordingly
-    // and move the container so that the next image in the desired direction moves into the viewport
-    // on "mousedown"/"touchstart", lock x-coordiate
-    // and store it into an initial coordinate variable x0:
     let x0 = null;
     let locked = false;
     let timeOutLoop = '';
-    let slideAuto = $(`.${name}.galery_content`).data('auto') || false;
-    let slideLoop = $(`.${name}.galery_content`).data('loop') || false;
-    let timeLoop = $(`.${name}.galery_content`).data('time') || false;
-    // // ===============
+    let slideAuto = document.querySelector(`.${name}.galery_content`).getAttribute('data-auto') || false;
+    let slideLoop = document.querySelector(`.${name}.galery_content`).getAttribute('data-loop') || false;
+    let timeLoop = document.querySelector(`.${name}.galery_content`).getAttribute('data-time') || false;
     // // prev, next
-    if($(`.${name} .galery_prev`).length){
-	    // // ===============
+    let checkNav = document.querySelector(`.${name} .galery_prev`) || null;
+    if(checkNav){
 	    let prev = document.querySelector(`.${name} .galery_prev`);
 	    let next = document.querySelector(`.${name} .galery_next`);
 	    prev.addEventListener("click", () => {
@@ -30,7 +18,6 @@ function SudoSlides(name = '.dnvSlide'){
 				return;
 			} else if (itemGlR > 0) {
 				let glr = document.querySelector(`.${name} .galery_list`);
-				// decrease i as long as it is bigger than the number of slides
 				itemGlR = itemGlR - 1;
 				glr.style.setProperty("--i", itemGlR);
 				glr.style.setProperty("--tx", "0px");
@@ -44,7 +31,6 @@ function SudoSlides(name = '.dnvSlide'){
 	    next.addEventListener("click", () => {
 			let glr = document.querySelector(`.${name} .galery_list`);
 			if (itemGlR+1 < totalGLIT) {
-				// increase i as long as it's smaller than the number of slides
 				itemGlR += 1;
 			} else {
 				if(slideLoop != false){
@@ -60,9 +46,7 @@ function SudoSlides(name = '.dnvSlide'){
 		    }
 	    });
 	}
-    // ===============
     // slider event listeners for mouse and touch (start, move, end)
-    // ===============
     _C.addEventListener("mousemove", drag, false);
     _C.addEventListener("touchmove", drag, false);
     _C.addEventListener("mousedown", lock, false);
@@ -81,12 +65,11 @@ function SudoSlides(name = '.dnvSlide'){
 
     function lock(e){
         x0 = unify(e).clientX;
-        // remove .smooth class
         let glr = document.querySelector(`.${name} .galery_list`);
         glr.classList.toggle("smooth", !(locked = true));
     }
 
-    if(slideAuto != false) {
+    if(slideAuto != 'false') {
     	loopSlides();
     }
     function loopSlides(){
@@ -94,7 +77,6 @@ function SudoSlides(name = '.dnvSlide'){
     	timeOutLoop = setTimeout(function(){
 		    let glr = document.querySelector(`.${name} .galery_list`);
 	    	if (itemGlR+1 < totalGLIT) {
-		        // increase i as long as it's smaller than the number of slides
 		        itemGlR += 1;
 		     } else {
 		      	itemGlR = 0;
@@ -102,30 +84,20 @@ function SudoSlides(name = '.dnvSlide'){
 	        glr.style.setProperty("--i", itemGlR);
 	        glr.style.setProperty("--tx", "0px");
 	        glr.style.setProperty("--f", 0.5667);
-            $(`.${name} .galery_list`).toggleClass('smooth');
+            document.querySelector(`.${name} .galery_list`).classList.toggle ('smooth');
 		    loopSlides();
 	    }, parseInt(timeLoop))
     }
-    // next, make the images move when the user swipes:
-    // was the lock action performed aka is x0 set?
-    // if so, read current x coordiante and compare it to x0
-    // from the difference between these two determine what to do next
     function move(e){
         if (locked) {
-            // set threshold of 20% (if less, do not drag to the next image)
-            // dx = number of pixels the user dragged
             let windowWidth = window.innerWidth;
             let dx = unify(e).clientX - x0;
-            let totalGLIT = $(`.${name} .galery_list .item`).length;
+            let totalGLIT = document.querySelector(`.${name} .galery_list`).children.length;
             let s = Math.sign(dx);
             let f = +(s * dx / windowWidth).toFixed(2);
             let glr = document.querySelector(`.${name} .galery_list`);
-            // Math.sign(dx) returns 1 or -1
-            // depending on this, the slider goes backwards or forwards
-            // alertFade('itemGlR: '+itemGlR +' totalGLIT: '+totalGLIT + ' s: '+s+' f: '+f, 'success')
             if ((itemGlR > 0 || s < 0) && (itemGlR < totalGLIT - 1 || s > 0) && f > 0.2) {
                 itemGlR -= s;
-                // alertFade(itemGlR, 'error')
                 glr.style.setProperty("--i", itemGlR);
                 f = 1 - f;
             } else if((itemGlR >= totalGLIT - 1) && slideLoop != false) {
@@ -136,7 +108,7 @@ function SudoSlides(name = '.dnvSlide'){
             glr.style.setProperty("--tx", "0px");
             glr.style.setProperty("--f", f);
             locked = false;
-            $(`.${name} .galery_list`).toggleClass('smooth');
+            document.querySelector(`.${name} .galery_list`).classList.toggle ('smooth');
             x0 = null;
             if(slideAuto != false){
 		    	clearTimeout(timeOutLoop);
@@ -144,9 +116,7 @@ function SudoSlides(name = '.dnvSlide'){
 		    }
         }
     }
-    // ===============
     // drag-animation for the slider when it reaches the end
-    // ===============
     function drag(e){
         if (locked) {
             _C.style.setProperty("--tx", `${Math.round(unify(e).clientX - x0)}px`);

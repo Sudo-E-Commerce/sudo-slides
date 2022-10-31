@@ -23,7 +23,7 @@ function SudoSlides(name = '.dnvSlide'){
 				glr.style.setProperty("--tx", "0px");
 				glr.style.setProperty("--f", 0);
 			}
-	    	if(slideAuto != false){
+	    	if(slideAuto != 'false'){
 		    	clearTimeout(timeOutLoop);
 		    	loopSlides();
 		    }
@@ -33,14 +33,14 @@ function SudoSlides(name = '.dnvSlide'){
 			if (itemGlR+1 < totalGLIT) {
 				itemGlR += 1;
 			} else {
-				if(slideLoop != false){
+				if(slideLoop != 'false'){
 					itemGlR = 0;
 				}
 			}
 	        glr.style.setProperty("--i", itemGlR);
 	        glr.style.setProperty("--tx", "0px");
 	        glr.style.setProperty("--f", 0.5667);
-	        if(slideAuto != false){
+	        if(slideAuto != 'false'){
 		    	clearTimeout(timeOutLoop);
 		    	loopSlides();
 		    }
@@ -100,7 +100,7 @@ function SudoSlides(name = '.dnvSlide'){
                 itemGlR -= s;
                 glr.style.setProperty("--i", itemGlR);
                 f = 1 - f;
-            } else if((itemGlR >= totalGLIT - 1) && slideLoop != false) {
+            } else if((itemGlR >= totalGLIT - 1) && slideLoop != 'false') {
             	itemGlR = 0;
             	glr.style.setProperty("--i", itemGlR);
             	f = 0.5667;
@@ -110,7 +110,7 @@ function SudoSlides(name = '.dnvSlide'){
             locked = false;
             document.querySelector(`.${name} .galery_list`).classList.toggle ('smooth');
             x0 = null;
-            if(slideAuto != false){
+            if(slideAuto != 'false'){
 		    	clearTimeout(timeOutLoop);
 		    	loopSlides();
 		    }

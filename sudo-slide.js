@@ -1,147 +1,185 @@
-function SudoSlides(name = '.dnvSlide'){
-    const _C = document.querySelector(`.${name} .galery_list`),
-    totalGLIT = _C.children.length;
-    _C.style.setProperty("--n", totalGLIT);
-    let x0 = null;
-    let locked = false;
-    let timeOutLoop = '';
-    let slideAuto = document.querySelector(`.${name}.galery_content`).getAttribute('data-auto') || false;
-    let slideLoop = document.querySelector(`.${name}.galery_content`).getAttribute('data-loop') || false;
-    let timeLoop = document.querySelector(`.${name}.galery_content`).getAttribute('data-time') || false;
-    // // prev, next
-    let checkNav = document.querySelector(`.${name} .galery_prev`) || null;
-    if(checkNav){
-	    let prev = document.querySelector(`.${name} .galery_prev`);
-	    let next = document.querySelector(`.${name} .galery_next`);
-	    prev.addEventListener("click", () => {
-			if (itemGlR == 0) {
-				return;
-			} else if (itemGlR > 0) {
-				let glr = document.querySelector(`.${name} .galery_list`);
-				itemGlR = itemGlR - 1;
-				glr.style.setProperty("--i", itemGlR);
-				glr.style.setProperty("--tx", "0px");
-				glr.style.setProperty("--f", 0);
-			}
-	    	if(slideAuto != 'false'){
-		    	clearTimeout(timeOutLoop);
-		    	loopSlides();
-		    }
-	    });
-	    next.addEventListener("click", () => {
-			let glr = document.querySelector(`.${name} .galery_list`);
-			if (itemGlR+1 < totalGLIT) {
-				itemGlR += 1;
-			} else {
-				if(slideLoop != 'false'){
-					itemGlR = 0;
-				}
-			}
-	        glr.style.setProperty("--i", itemGlR);
-	        glr.style.setProperty("--tx", "0px");
-	        glr.style.setProperty("--f", 0.5667);
-	        if(slideAuto != 'false'){
-		    	clearTimeout(timeOutLoop);
-		    	loopSlides();
-		    }
-	    });
-	}
-    // slider event listeners for mouse and touch (start, move, end)
-    _C.addEventListener("mousemove", drag, false);
-    _C.addEventListener("touchmove", drag, false);
-    _C.addEventListener("mousedown", lock, false);
-    _C.addEventListener("touchstart", lock, false);
-    _C.addEventListener("mouseup", move, false);
-    _C.addEventListener("touchend", move, false);
-    // override Edge swipe behaviour
-    _C.addEventListener(
-        "touchmove",
-        e => {
+function sudoSlide(elem = '', resp=[], nav = true, dots = true, autoP = true, timeS = 0, nextI = 0, margin = 0, customDot = 0, dotAttribute = '', responsiveDot = []){
+    const slide = document.querySelector(`#${elem}`);
+    if (!slide) {
+      return false;
+    }
+    const images = slide.querySelectorAll(`img`);
+    images.forEach(image => {
+        image.addEventListener('dragstart', e => {
             e.preventDefault();
-        },
-        false
-    );
-    let itemGlR = 0;
+        });
+    });
+    var slideC = document.querySelector(`#${elem} .s-content`);
+    if(slideC){
+        slideC.style.transform = `translateX(0px)`;
+        var parent = document.querySelector(`#${elem}`).parentNode;
+        var width = parent.clientWidth;
+        var listI = slideC.children;
+        var widthS = 0;
+        var qtyItem = 0;
+        var autoScroll = 0;
+        resp.forEach(function(elm, index) {
+            let maxWidth = elm.maxWidth;
+            let minWidth = elm.minWidth;
+            if(width <= maxWidth && width > minWidth ){
+                qtyItem = elm.qtyItem;
+                nextI = elm.nextI || nextI;
+                widthS = (width / qtyItem * listI.length) + (margin * (qtyItem - 1) * listI.length / (2 * qtyItem));
+                slideC.style.width = `${widthS}px`;
+                Array.from(listI).forEach(child => {
+                  child.style.width = `${(widthS / listI.length) - (margin * (qtyItem - 1) / qtyItem)}px`;
+                  child.style.marginRight = `${margin}px`;
+                });
+                // next, prev
+                if (nav) {
+                    slide.insertAdjacentHTML("beforeend", `<div class="nav"><div class="nav-next"></div><div class="nav-prev"></div></div>`);
+                    var next = slide.querySelector(`.nav-next`);
+                    var prev = slide.querySelector(`.nav-prev`);
+                    [next, prev].forEach((el) => {
+                        el.addEventListener(
+                            "click",
+                            function () {
+                            if (el === next) {
+                                right(nextI || 1);
+                            } else {
+                                left(nextI || 1);
+                            }
 
-    function lock(e){
-        x0 = unify(e).clientX;
-        let glr = document.querySelector(`.${name} .galery_list`);
-        glr.classList.toggle("smooth", !(locked = true));
-    }
-
-    if(slideAuto != 'false') {
-    	loopSlides();
-    }
-    function loopSlides(){
-    	clearTimeout(timeOutLoop);
-    	timeOutLoop = setTimeout(function(){
-		    let glr = document.querySelector(`.${name} .galery_list`);
-	    	if (itemGlR+1 < totalGLIT) {
-		        itemGlR += 1;
-		     } else {
-		      	itemGlR = 0;
-		    }
-	        glr.style.setProperty("--i", itemGlR);
-	        glr.style.setProperty("--tx", "0px");
-	        glr.style.setProperty("--f", 0.5667);
-            document.querySelector(`.${name} .galery_list`).classList.toggle ('smooth');
-		    loopSlides();
-	    }, parseInt(timeLoop))
-    }
-    function move(e){
-        if (locked) {
-            let windowWidth = window.innerWidth;
-            let dx = unify(e).clientX - x0;
-            let totalGLIT = document.querySelector(`.${name} .galery_list`).children.length;
-            let s = Math.sign(dx);
-            let f = +(s * dx / windowWidth).toFixed(2);
-            let glr = document.querySelector(`.${name} .galery_list`);
-            if ((itemGlR > 0 || s < 0) && (itemGlR < totalGLIT - 1 || s > 0) && f > 0.2) {
-                itemGlR -= s;
-                glr.style.setProperty("--i", itemGlR);
-                f = 1 - f;
-            } else if((itemGlR >= totalGLIT - 1) && slideLoop != 'false') {
-            	itemGlR = 0;
-            	glr.style.setProperty("--i", itemGlR);
-            	f = 0.5667;
+                            if (autoP) {
+                                clearInterval(autoScroll);
+                                    setLoopSlide();
+                                }
+                            },
+                            { passive: true }
+                        );
+                    });
+                }
+                //dots
+                if(dots){
+                    let dotsHtml = `<div class="dots">`;
+                    if(customDot) dotsHtml = `<div class="dots-custom"><div class="s-wrap" id="dot-custom-${elem}"><div class="s-content">`;
+                    for(let j = 0; j <= (Math.round((listI.length - qtyItem) / nextI)); j++){
+                        let dot = ''
+                        if(customDot) {
+                            dot = `
+                                <div class="dot-custom">
+                                    <img src="${listI[j].getAttribute(dotAttribute)}" loading="lazy" alt="">
+                                </div>
+                            `;
+                        }
+                        dotsHtml += `<div class="dot dot-${j} ${j == 0 ? 'active' : ''}">${dot}</div>`;
+                    }
+                    dotsHtml += `</div>`;
+                    if(customDot) dotsHtml += `</div></div>`
+                    slide.insertAdjacentHTML("beforeend", dotsHtml);
+                    if(customDot) {
+                        sudoSlide(
+                            `dot-custom-${elem}`,
+                            responsiveDot,
+                            true, false, false, 5000, 1, 0, 0
+                        );
+                    }
+                    let dotActive = document.querySelector(`#${elem} .dot.active`);
+                    let listDots = document.querySelectorAll(`#${elem} .dot`);
+                    const checkDot = () => {
+                        dotActive.classList.remove('active');
+                        dotActive = document.querySelector(`#${elem} .dot-${i}`);
+                        dotActive.classList.add('active');
+                    }
+                    for (let dotItem of listDots) {
+                        dotItem.addEventListener('click', function(e){
+                            var dotClick = e.target;
+                            dotClass = dotClick.getAttribute('class');
+                            dotIndex = dotClass.replace(/[^\d]+/g, "");
+                            if(dotIndex != i){
+                                i = dotIndex - 1;
+                                right(nextI);
+                            }
+                            checkDot();
+                        }, { passive: true });
+                    }
+                }
+                // next và pev
+                var i = 0;
+                function left(qtynextI){
+                    i = Math.max(0, i - 1);
+                    let transform = ((widthS / listI.length)) * i * qtynextI;
+                    slideC.style.transform = `translateX(${-transform}px)`;
+                    if(dots){
+                        let dotActive = document.querySelector(`#${elem} .dot.active`);
+                        let listDots = document.querySelectorAll(`#${elem} .dot`);
+                        dotActive.classList.remove('active');
+                        dotActive = document.querySelector(`#${elem} .dot-${i}`);
+                        dotActive.classList.add('active');
+                    }
+                    if(autoP){
+                        clearInterval(autoScroll)
+                        setLoopSlide()
+                    }
+                }
+                function right(qtynextI) {
+                    const maxIndex = Math.round((listI.length - qtyItem) / qtynextI);
+                    i = i >= maxIndex ? 0 : i + 1;
+                    const transform = ((widthS / listI.length)) * Math.min(i * qtynextI, (listI.length - qtyItem) / qtynextI) ;
+                    slideC.style.transform = `translateX(${-transform}px)`;
+                    if(dots) {
+                        let dotActive = document.querySelector(`#${elem} .dot.active`);
+                        let listDots = document.querySelectorAll(`#${elem} .dot`);
+                        dotActive.classList.remove('active');
+                        dotActive = document.querySelector(`#${elem} .dot-${i}`);
+                        dotActive.classList.add('active');
+                    }
+                    if(autoP) {
+                        clearInterval(autoScroll);
+                        setLoopSlide();
+                    }
+                }
+                function setLoopSlide(){
+                    autoScroll = setInterval(() => right(nextI || 1), timeS);
+                }
+                autoP && setLoopSlide();
+                let isDragStart = false, mousedown, mouseup, touch;
+                let link = '';
+                const dragStart = (e) => {
+                    e.preventDefault();
+                    if (e.button === 2) return false;
+                    mousedown = (e.type === 'mousedown') ? e.pageX : e.changedTouches[e.changedTouches.length - 1].pageX;
+                    isDragStart = true;
+                }
+                const dragEnd = (e) => {
+                    if (e.button === 2) return false;
+                    mouseup = (e.type === 'mouseup') ? e.pageX : e.changedTouches[e.changedTouches.length - 1].pageX;
+                    isDragStart = false;
+                    checkHref = e.target;
+                    if (mousedown < mouseup) left(nextI || 1);
+                    else if (mousedown > mouseup) right(nextI || 1);
+                    else {
+                        let dataLink = checkHref.getAttribute('data-href') || '';
+                        if (dataLink != '') window.location.href = dataLink;
+                    }
+                }
+                const dragMobileStart = (e) => {
+                    touch = e.changedTouches[e.changedTouches.length - 1];
+                    mousedown = touch.pageX;
+                    isDragStart = true;
+                }
+                const dragMobileEnd = (e) => {
+                    touch = e.changedTouches[e.changedTouches.length - 1];
+                    mouseup = touch.pageX;
+                    isDragStart = false;
+                    checkHref = e.target;
+                    if (mousedown < mouseup) left(nextI || 1);
+                    else if (mousedown > mouseup) right(nextI || 1);
+                    else {
+                        let dataLink = checkHref.getAttribute('data-href') || '';
+                        if (dataLink != '') window.location.href = dataLink;
+                    }
+                }
+                slideC.addEventListener('mousedown', dragStart, {passive: true});
+                slideC.addEventListener("touchstart", dragMobileStart, {passive: true});
+                slideC.addEventListener('mouseup', dragEnd, {passive: true});
+                slideC.addEventListener("touchend", dragMobileEnd, {passive: true});
             }
-            glr.style.setProperty("--tx", "0px");
-            glr.style.setProperty("--f", f);
-            locked = false;
-            document.querySelector(`.${name} .galery_list`).classList.toggle ('smooth');
-            x0 = null;
-            if(slideAuto != 'false'){
-		    	clearTimeout(timeOutLoop);
-		    	loopSlides();
-		    }
-        }
-    }
-    // drag-animation for the slider when it reaches the end
-    function drag(e){
-        if (locked) {
-            _C.style.setProperty("--tx", `${Math.round(unify(e).clientX - x0)}px`);
-        }
-    }
-}
-// unify touch and click cases:
-let old_toch = { clientX: 106, screenX: 106};
-function unify(e) {
-    if( [
-        'iPad Simulator',
-        'iPhone Simulator',
-        'iPod Simulator',
-        'iPad',
-        'iPhone',
-        'iPod'
-      ].includes(navigator.platform)
-      // iPad on iOS 13 detection
-      || (navigator.userAgent.includes("Mac") && "ontouchend" in document)) {
-        let toch =  e.changedTouches ? e.changedTouches[0] : (e.touches ? e.touches[0] : e);
-        if(typeof toch !== 'undefined') {
-            old_toch = toch;
-        }
-        return old_toch;
-    }else {
-        return e.changedTouches ? e.changedTouches[0] : e;
+        });
     }
 }
